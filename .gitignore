@@ -1,6 +1,4 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
-# dependencies
+# Dependencias
 node_modules/
 
 # Expo
@@ -8,7 +6,16 @@ node_modules/
 dist/
 web-build/
 
-# Native
+# Archivos generados por Expo
+*.expo
+*.expo-shared
+
+# Archivos de configuración de Expo
+*.expo.*
+*.expo-app.json
+*.expo-config.js
+
+# Archivos nativos
 *.orig.*
 *.jks
 *.p8
@@ -16,20 +23,29 @@ web-build/
 *.key
 *.mobileprovision
 
-# Metro
-.metro-health-check*
+# Metro Bundler
+.metro/
 
-# debug
+# Archivos de depuración
 npm-debug.*
 yarn-debug.*
 yarn-error.*
 
-# macOS
+# Archivos del sistema macOS
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
+# Archivos de entorno local
+.env
+.env.local
+.env.*.local
 
-# typescript
+# Archivos de TypeScript
 *.tsbuildinfo
+
+# Archivos de caché
+*.cache
+*.tmp
+
+# Archivos de build de TypeScript
+build/
