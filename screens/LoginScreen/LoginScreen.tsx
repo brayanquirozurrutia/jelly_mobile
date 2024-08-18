@@ -7,7 +7,6 @@ import * as Animatable from 'react-native-animatable';
 import { styles } from './LoginScreenStyles';
 import { colors } from "../../theme";
 import { useLogin } from './useLogin';
-import {LOGO_URL} from "@env";
 
 const LoginScreen: React.FC = () => {
     const {
@@ -25,7 +24,7 @@ const LoginScreen: React.FC = () => {
         <SafeAreaView style={styles.container}>
             <View style={styles.innerContainer}>
                 <Image
-                    source={{ uri: LOGO_URL }}
+                    source={{ uri: 'https://res.cloudinary.com/tecitostore/image/upload/v1719678497/Assets/logo.png' }}
                     style={styles.logo}
                     resizeMode="contain"
                 />

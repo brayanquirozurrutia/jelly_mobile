@@ -2,11 +2,14 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import LoginScreen from '../screens/LoginScreen/LoginScreen';
-import { StatusBar } from 'expo-status-bar'; // Usa expo-status-bar
+import IdentityVerificationScreen from '../screens/IdentityVerificationScreen/IdentityVerificationScreen';
+import CameraScreen from "../screens/CameraScreen";
+import { StatusBar } from 'expo-status-bar';
 
-type RootStackParamList = {
+export type RootStackParamList = {
     Login: undefined;
-    // Agrega más pantallas aquí si las tienes
+    IdentityVerification: undefined;
+    CameraScreen: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -21,7 +24,16 @@ const AppNavigator: React.FC = () => {
                     component={LoginScreen}
                     options={{ title: 'Login' }}
                 />
-                {/* Agrega más pantallas aquí en el futuro */}
+                <Stack.Screen
+                    name="IdentityVerification"
+                    component={IdentityVerificationScreen}
+                    options={{ title: 'Verificación de Identidad' }}
+                />
+                <Stack.Screen
+                    name="CameraScreen"
+                    component={CameraScreen}
+                    options={{ title: 'Captura de Identidad' }}
+                />
             </Stack.Navigator>
         </NavigationContainer>
     );

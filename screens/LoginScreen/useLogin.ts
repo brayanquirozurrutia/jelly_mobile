@@ -3,13 +3,18 @@ import { Alert } from 'react-native';
 import {login} from "../../api/auth";
 import {useLoading} from "../../hooks/useLoading";
 import {useString} from "../../hooks/useString";
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../../navigation/AppNavigator';
+
+type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 export const useLogin = () => {
 
     const emailField = useString('');
     const passwordField = useString('');
-
     const { loading, setLoadingState } = useLoading();
+    const navigation = useNavigation<NavigationProp>();
 
     const handleLogin = async () => {
         emailField.setError(null);
@@ -37,9 +42,18 @@ export const useLogin = () => {
         }
 
         setLoadingState(true);
+
         try {
-            const response = await login({ email: emailField.value, password: passwordField.value });
-            Alert.alert('Login Success', 'You are logged in!');
+            const response = await login({
+                email: emailField.value,
+                password: passwordField.value
+            });
+
+            if (!response.verified_identity) {
+                navigation.navigate('IdentityVerification');
+            } else {
+                Alert.alert('Login Success', 'You are logged in!');
+            }
         } catch (error) {
             if (error instanceof Error) {
                 Alert.alert('Error', error.message);
