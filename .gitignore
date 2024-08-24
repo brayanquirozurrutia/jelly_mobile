@@ -49,3 +49,5 @@ yarn-error.*
 
 # Archivos de build de TypeScript
 build/
+
+**/Microsoft/
