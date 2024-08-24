@@ -9,6 +9,8 @@ import {
     ViewStyle
 } from 'react-native';
 
+import {colors} from "../theme";
+
 interface ButtonProps {
     title: string;
     onPress: () => void;
@@ -20,7 +22,7 @@ const Button: React.FC<ButtonProps> = ({
                                            title,
                                            onPress,
                                            loading = false,
-                                           color = '#007BFF'
+                                           color = colors.purple,
                                        }) => {
     return (
         <TouchableOpacity

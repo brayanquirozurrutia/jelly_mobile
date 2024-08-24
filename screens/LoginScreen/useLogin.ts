@@ -1,15 +1,25 @@
 import { validateEmail, validatePassword } from '../../utils/validation';
 import { Alert } from 'react-native';
 import {login} from "../../api/auth";
-import {useLoading} from "../../hooks/useLoading";
+import {useBoolean} from "../../hooks/useBoolean";
 import {useString} from "../../hooks/useString";
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../../navigation/AppNavigator';
+import * as SecureStore from 'expo-secure-store';
+
+type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 export const useLogin = () => {
 
     const emailField = useString('');
     const passwordField = useString('');
+    const {
+        state: loading,
+        setBooleanState: setLoadingState,
+    } = useBoolean();
 
-    const { loading, setLoadingState } = useLoading();
+    const navigation = useNavigation<NavigationProp>();
 
     const handleLogin = async () => {
         emailField.setError(null);
@@ -37,9 +47,22 @@ export const useLogin = () => {
         }
 
         setLoadingState(true);
+
         try {
-            const response = await login({ email: emailField.value, password: passwordField.value });
-            Alert.alert('Login Success', 'You are logged in!');
+            const response = await login({
+                email: emailField.value,
+                password: passwordField.value
+            });
+
+            await SecureStore.setItemAsync('accessToken', response.access_token);
+            await SecureStore.setItemAsync('refreshToken', response.refresh_token);
+            await SecureStore.setItemAsync('userId', response.id.toString());
+
+            if (!response.verified_identity) {
+                navigation.navigate('IdentityVerification', { userId: response.id });
+            } else {
+                navigation.navigate('Home');
+            }
         } catch (error) {
             if (error instanceof Error) {
                 Alert.alert('Error', error.message);

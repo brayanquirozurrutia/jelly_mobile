@@ -5,9 +5,7 @@ import InputField from '../../components/InputField';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import * as Animatable from 'react-native-animatable';
 import { styles } from './LoginScreenStyles';
-import { colors } from "../../theme";
 import { useLogin } from './useLogin';
-import {LOGO_URL} from "@env";
 
 const LoginScreen: React.FC = () => {
     const {
@@ -25,7 +23,7 @@ const LoginScreen: React.FC = () => {
         <SafeAreaView style={styles.container}>
             <View style={styles.innerContainer}>
                 <Image
-                    source={{ uri: LOGO_URL }}
+                    source={{ uri: 'https://res.cloudinary.com/tecitostore/image/upload/v1719678497/Assets/logo.png' }}
                     style={styles.logo}
                     resizeMode="contain"
                 />
@@ -49,7 +47,6 @@ const LoginScreen: React.FC = () => {
                     title="Iniciar sesión"
                     onPress={handleLogin}
                     loading={loading}
-                    color={colors.purple}
                 />
                 <View style={styles.linkContainer}>
                     <TouchableOpacity onPress={() => Alert.alert('Crear Cuenta', 'Navegar a pantalla de registro')}>
