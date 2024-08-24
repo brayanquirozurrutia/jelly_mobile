@@ -51,4 +51,10 @@ yarn-error.*
 build/
 
 **/Microsoft/
-%ProgramData%
+%ProgramData%/
+**%ProgramData%
+**/%ProgramData%
+**/%ProgramData%/
+**/ProgramData/
+**/ProgramData
+**ProgramData/
