@@ -1,6 +1,6 @@
 import React from 'react';
-import AppNavigator from './navigation/AppNavigator'; // Importa AppNavigator
+import AppNavigator from './navigation/AppNavigator';
 
 export default function App() {
-  return <AppNavigator />; // Usa AppNavigator como el componente raíz
+  return <AppNavigator />;
 }

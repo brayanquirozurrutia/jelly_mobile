@@ -27,6 +27,10 @@ const styles = StyleSheet.create({
     buttonContainer: {
         marginTop: 20,
     },
+    textLink: {
+        color: colors.link,
+        fontSize: 16,
+    }
 });
 
 export default styles;

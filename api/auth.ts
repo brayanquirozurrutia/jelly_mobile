@@ -1,11 +1,22 @@
 import { handleAxiosError } from "./error";
-import { USERS_LOGIN, USERS_VERIFY_IDENTITY } from '@env';
+import {
+    USERS_LOGIN,
+    USERS_VERIFY_IDENTITY,
+    USERS_LOGOUT,
+} from '@env';
 import axiosInstance from "../axiosInstance";
+import {getRefreshToken} from "../axiosInstance";
+
+interface CommonMessageResponse {
+    message: string;
+}
 
 interface LoginResponse {
     id: string;
     user_admin: boolean;
     verified_identity: boolean;
+    access_token: string;
+    refresh_token: string;
 }
 
 export const login = async (data: {
@@ -28,16 +39,12 @@ export const login = async (data: {
     }
 };
 
-
-interface VerifyICResponse {
-    message?: string;
-}
-
 export const verifyIdentity = async (
     frontIdImageUri: string,
     backIdImageUri: string,
-    faceImageUri: string
-): Promise<VerifyICResponse> => {
+    faceImageUri: string,
+    userId: string,
+): Promise<CommonMessageResponse> => {
     const formData = new FormData();
 
     formData.append('front_id_image', {
@@ -59,8 +66,8 @@ export const verifyIdentity = async (
     } as any);
 
     try {
-        const response = await axiosInstance.post<VerifyICResponse>(
-            USERS_VERIFY_IDENTITY,
+        const response = await axiosInstance.post<CommonMessageResponse>(
+            `${USERS_VERIFY_IDENTITY}${userId}/`,
             formData,
         {
             headers: {
@@ -70,7 +77,27 @@ export const verifyIdentity = async (
         });
         return response.data;
     } catch (error) {
-        console.error('Error en la solicitud:', error);
+        return handleAxiosError(error);
+    }
+};
+
+export const logout = async (): Promise<CommonMessageResponse> => {
+    try {
+        const refreshToken = await getRefreshToken();
+
+        const response = await axiosInstance.post<CommonMessageResponse>(
+            USERS_LOGOUT,
+            {
+                refresh_token: refreshToken || '',
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'accept': 'application/json',
+                },
+            });
+        return response.data;
+    } catch (error) {
         return handleAxiosError(error);
     }
 };

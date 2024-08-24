@@ -14,6 +14,8 @@
     "axios": "^1.7.4",
     "expo": "~51.0.26",
     "expo-camera": "~15.0.14",
+    "expo-image-picker": "^15.0.7",
+    "expo-secure-store": "^13.0.2",
     "expo-status-bar": "~1.12.1",
     "react": "18.2.0",
     "react-native": "0.74.5",

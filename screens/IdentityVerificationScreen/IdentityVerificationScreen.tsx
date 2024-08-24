@@ -1,20 +1,26 @@
 import React from 'react';
-import { View, Text, SafeAreaView, Button, TouchableOpacity } from 'react-native';
+import {View, Text, SafeAreaView, TouchableOpacity} from 'react-native';
 import styles from './IdentityVerificationScreenStyles';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../navigation/AppNavigator';
+import Button from '../../components/Button';
+import { IdentityVerificationScreenProps } from './IdentityVerificationScreen.types';
+import {useIdentityVerificationScreen} from "./useIdentityVerificationScreen";
+import LoadingModal from "../../components/LoadingModal";
 
-// Tipar las props del componente con la navegación
-type IdentityVerificationScreenNavigationProp = StackNavigationProp<RootStackParamList, 'IdentityVerification'>;
+const IdentityVerificationScreen: React.FC<IdentityVerificationScreenProps> = (
+    {
+        navigation,
+        route
+    }) => {
 
-interface IdentityVerificationScreenProps {
-    navigation: IdentityVerificationScreenNavigationProp;
-}
-
-const IdentityVerificationScreen: React.FC<IdentityVerificationScreenProps> = ({ navigation }) => {
-    const handleValidateIdentity = () => {
-        navigation.navigate('CameraScreen'); // Navega a la pantalla de la cámara
-    };
+    const {
+        handleValidateIdentity,
+        handleLogout,
+        loggingOut,
+    } = useIdentityVerificationScreen(
+        {
+            navigation,
+            route
+        });
 
     return (
         <SafeAreaView style={styles.container}>
@@ -24,11 +30,19 @@ const IdentityVerificationScreen: React.FC<IdentityVerificationScreenProps> = ({
                     Tu identidad no ha sido verificada. Por favor, verifica tu identidad para continuar usando la aplicación.
                 </Text>
                 <View style={styles.buttonContainer}>
-                    <Button title="Volver a Intentar" onPress={() => {/* Navegar a la pantalla de login */}} />
+                    <Button title="Verificar Identidad" onPress={handleValidateIdentity} />
                 </View>
                 <View style={styles.buttonContainer}>
-                    <Button title="Validar Identidad" onPress={handleValidateIdentity} />
+                    <TouchableOpacity onPress={handleLogout}>
+                        <Text style={styles.textLink}>Salir</Text>
+                    </TouchableOpacity>
                 </View>
+                {loggingOut && (
+                    <LoadingModal
+                        visible={loggingOut}
+                        message="Cerrando sesión..."
+                    />
+                )}
             </View>
         </SafeAreaView>
     );

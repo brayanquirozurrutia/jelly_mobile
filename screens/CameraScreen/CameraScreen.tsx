@@ -1,143 +1,135 @@
-import {useCameraPermissions} from 'expo-camera';
-import React, {useRef, useState} from 'react';
-import {Alert, Button, Dimensions, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {Camera, CameraType, FlashMode} from "expo-camera/legacy";
-import {verifyIdentity} from "../../api/auth";
+import React from 'react';
+import {
+    Button,
+    Text,
+    TouchableOpacity,
+    View,
+    Image,
+    ActivityIndicator
+} from 'react-native';
+import { Camera} from "expo-camera/legacy";
+import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
+import { useCameraScreen} from "./useCameraScreen";
+import SuccessModal from "../../components/SuccessModal";
+import { cameraScreenStyles as styles } from "./CameraScreenStyles";
+import {RouteProp} from "@react-navigation/native";
+import {RootStackParamList} from "../../navigation/AppNavigator";
 
-/*
-* TODO: MEJORAR LA PANTALLA DE LA CÁMARA
-*  - Agregar un botón para cambiar el flash
-* - Agregar un botón para cambiar la relación de aspecto
-* - Agregar un botón para cambiar la calidad de la imagen
-* - Agregar un botón para cambiar el tamaño de la imagen
-* - Separar hoos de la lógica de la pantalla
- */
+type CameraScreenRouteProp = RouteProp<RootStackParamList, 'CameraScreen'>;
 
+interface CameraScreenProps {
+    route: CameraScreenRouteProp;
+}
 
-const CameraScreen: React.FC = () => {
-    const [permission, requestPermission] = useCameraPermissions();
-    const [type, setType] = useState<CameraType>(CameraType.back);
-    const [flash, setFlash] = useState<FlashMode>(FlashMode.auto);
-    const [capturing, setCapturing] = useState<number>(0);
-    const [frontIdImage, setFrontIdImage] = useState<string | null>(null);
-    const [backIdImage, setBackIdImage] = useState<string | null>(null);
-    const cameraRef = useRef<Camera>(null);
+const CameraScreen: React.FC<CameraScreenProps> = ({ route }) => {
+    const { userId } = route.params;
 
-    if (!permission) {
-        // Camera permissions are still loading.
-        return <View />;
-    }
+    const {
+        permission,
+        imagePickerPermission,
+        type,
+        flash,
+        capturing,
+        loading,
+        previewImage,
+        cameraRef,
+        imageLabels,
+        showPermissionModal,
+        requestPermission,
+        setImagePickerPermission,
+        toggleCameraFacing,
+        handleTakePicture,
+        retakePicture,
+        confirmPicture,
+        handleSelectImage,
+        isSuccessModalVisible,
+        setIsSuccessModalVisible,
+        openSettings,
+        setShowPermissionModal,
+        handleSuccessModalClose
+    } = useCameraScreen(userId);
 
-    if (!permission.granted) {
-        // Camera permissions are not granted yet.
+    const cameraPermissionGranted = permission?.granted ?? false;
+    const mediaLibraryPermissionGranted = imagePickerPermission ?? false;
+
+    if (!cameraPermissionGranted || !mediaLibraryPermissionGranted) {
         return (
             <View style={styles.container}>
-                <Text style={styles.message}>We need your permission to show the camera</Text>
-                <Button onPress={requestPermission} title="grant permission" />
+                <Text style={styles.message}>Para continuar, necesitas otorgar permisos de cámara y galería.</Text>
+                <Button onPress={requestPermission} title="Dar Permiso de Cámara" />
+                <Button onPress={async () => {
+                    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                    setImagePickerPermission(status === 'granted');
+                }} title="Dar Permiso de Galería" />
+                {showPermissionModal && (
+                    <SuccessModal
+                        visible={showPermissionModal}
+                        onClose={() => setShowPermissionModal(false)}
+                        textBody="No tienes acceso a la cámara o galería. Por favor, ve a los ajustes y habilita el acceso."
+                        buttonText="Ir a Ajustes"
+                        onButtonPress={openSettings}
+                    />
+                )}
             </View>
         );
     }
 
-    const toggleCameraFacing = () => {
-        setType(type === CameraType.back ? CameraType.front : CameraType.back);
-    }
-
-    const handleTakePicture = async () => {
-        if (cameraRef.current) {
-            const photoData = await cameraRef.current.takePictureAsync();
-            const { uri } = photoData;
-
-            if (uri) {
-                if (capturing === 0) {
-                    setFrontIdImage(uri);
-                    setCapturing(1);
-                } else if (capturing === 1) {
-                    setBackIdImage(uri);
-                    setCapturing(2);
-                } else if (capturing === 2) {
-                    setCapturing(0);
-                    await sendImages(uri);
-                }
-            }
-        }
-    };
-
-    const sendImages = async (faceImageUri: string) => {
-        try {
-            if (frontIdImage && backIdImage) {
-                const response = await verifyIdentity(
-                    frontIdImage,
-                    backIdImage,
-                    faceImageUri,
-                );
-                console.log(response);
-            }
-        } catch (error) {
-            if (error instanceof Error) {
-                Alert.alert('Error', error.message);
-            } else {
-                Alert.alert('Login Failed', 'Oops! Algo salió mal.');
-            }
-        }
-    };
-
     return (
         <View style={styles.container}>
-            <Camera
-                type={type}
-                ratio={'16:9'}
-                style={styles.camera}
-                flashMode={flash}
-                ref={cameraRef}
-                autoFocus={true}
-            >
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-                        <Text style={styles.text}>Flip Camera</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} onPress={handleTakePicture}>
-                        <Text style={styles.text}>Take Picture</Text>
-                    </TouchableOpacity>
+            <SuccessModal
+                visible={isSuccessModalVisible}
+                onClose={() => setIsSuccessModalVisible(false)}
+                textBody="¡Validación exitosa!"
+                onSuccess={handleSuccessModalClose}
+            />
+            {loading ? (
+                <ActivityIndicator size="large" color="#0000ff" />
+            ) : previewImage ? (
+                <View style={styles.previewContainer}>
+                    <View style={styles.topButtonContainer}>
+                        <TouchableOpacity style={styles.iconButton} onPress={handleSelectImage}>
+                            <Ionicons name="images-outline" size={32} color="black" />
+                        </TouchableOpacity>
+                    </View>
+                    <Image
+                        source={{ uri: previewImage }}
+                        style={styles.previewImage}
+                        resizeMode="contain"
+                    />
+                    <View style={styles.previewButtonContainer}>
+                        <TouchableOpacity style={styles.button} onPress={retakePicture}>
+                            <Text style={styles.text}>Retomar</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.button} onPress={confirmPicture}>
+                            <Text style={styles.text}>Confirmar</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </Camera>
+            ) : (
+                <Camera
+                    type={type}
+                    ratio={'16:9'}
+                    style={styles.camera}
+                    flashMode={flash}
+                    ref={cameraRef}
+                    autoFocus={true}
+                >
+                    <View style={styles.infoContainer}>
+                        <Text style={styles.imageLabel}>{imageLabels[capturing]}</Text>
+                    </View>
+                    <View style={styles.bottomButtonContainer}>
+                        <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+                            <Text style={styles.text}>Girar Cámara</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.button} onPress={handleTakePicture}>
+                            <Text style={styles.text}>Tomar Foto</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Camera>
+            )}
         </View>
     );
-}
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'black',
-    },
-    message: {
-        textAlign: 'center',
-        paddingBottom: 10,
-        color: 'white',
-    },
-    camera: {
-        width: '100%',
-        height: Dimensions.get('window').width * 16 / 9,
-    },
-    buttonContainer: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'flex-end',
-        width: '100%',
-        padding: 20,
-    },
-    button: {
-        backgroundColor: 'rgba(255, 255, 255, 0.5)',
-        padding: 10,
-        borderRadius: 5,
-    },
-    text: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: 'black',
-    },
-});
+};
 
 export default CameraScreen;

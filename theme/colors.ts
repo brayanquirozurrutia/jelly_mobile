@@ -1,11 +1,13 @@
 const colors = {
-    // Colores existentes
     purple: '#BE87E7',
     purple2: '#A57EE8',
     error: '#f44336',
+    cameraBackground: '#000000',
+    link: '#007BFF',
+    background: '#FFFFFF',
+    loadingAnimation: '#0000FF',
 
-    // Colores adicionales
-    background: '#FFFFFF',  // Color de fondo, puede ser blanco o el color que uses para el fondo de las pantallas
+
     primary: '#333333',     // Color principal, puede ser negro o el color principal de tu app
     text: '#666666',        // Color del texto, generalmente un gris oscuro
     border: '#DDDDDD',      // Color del borde, generalmente un gris claro
